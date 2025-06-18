@@ -9,5 +9,6 @@ relative_links:
 include:
   - README.md
   - REPORT.md
-
+  - docana-game-zeyuan.md
+  
 theme: jekyll-theme-minimal
