@@ -1,1 +1,1 @@
-<iframe src="{{ site.baseurl }}/figures/docana-game-zeyuan.html" width="100%" height="500"></iframe>
+<iframe src="{{ site.baseurl }}/figures/pca_plot.html" width="100%" height="500"></iframe>
