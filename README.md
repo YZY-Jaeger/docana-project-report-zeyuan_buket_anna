@@ -49,18 +49,112 @@ Our research primarily focus on gaming subreddits including 'leagueoflegends', '
 | zelda              | 1,182   |
 
 ## Methods
-[查看完整 Notebook 内容](./code/docana-project.ipynb)
+
 ### Preprocessing
 Firstly, we used the content text that doesn't include TL;DR part because it could bias the phrase extraction towards words that are common in summaries. Summaries often repeat key points in a condensed way rather than reflecting the natural flow of the document.
 
 We aimed to extract distinct phrases for each subreddit using a TF-IDF model. To improve the quality of the results, we first removed elements that are not useful for our task, such as links and stop words. In addition to stop words, we noticed that some phrases still appeared as important — for example, phrases like “quick play”, “ranked games”, or “playing overwatch”. To address this, we also removed certain domain-related words like “play”, “playing”, “game”, as well as the names of the games themselves, like "pokemon", "zelda", and "smash" etc., so that phrases containing these words would not dominate the results. Finally, we applied stemming to normalize word forms and avoid treating different surface forms of the same concept as distinct phrases.
+
+
+
+
+```python
+common_words = {"game", "games", "gaming", "player", "play", "playing", "plays", "pokemon", "zelda", "smash", "smashbros" "overwatch", "hearthstone", "legends"}
+    
+def preprocess(text):
+    text = text.lower()
+    text = re.sub(r"http\S+|www\S+|https\S+", '', text) #removes links if any
+    text = re.sub(r'[^a-z\s]', ' ', text) #replaces anything that is not a letter or space with a space
+    text = re.sub(r'\s+', ' ', text).strip() #replace multiple whitespace characters with a single space
+    tokens = text.split()
+    tokens = [word for word in tokens if word not in stop_words and word not in common_words]
+    return " ".join(tokens)
+
+# Apply to the filtered gaming dataset
+df_games['cleaned_body'] = df_games['content'].apply(preprocess)
+```
+
+
+```python
+df_games[['subreddit', 'body', 'cleaned_body']].head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>subreddit</th>
+      <th>body</th>
+      <th>cleaned_body</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>15</th>
+      <td>leagueoflegends</td>
+      <td>Didn't they lose 6 games in a row? Just becaus...</td>
+      <td>lose row close mean lot weaker team love arkan...</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>leagueoflegends</td>
+      <td>Because spinning axe is a massive damage buff(...</td>
+      <td>spinning axe massive damage buff percent based...</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>zelda</td>
+      <td>My thoughts from nine months ago and its corre...</td>
+      <td>thoughts nine months ago corresponding discuss...</td>
+    </tr>
+    <tr>
+      <th>123</th>
+      <td>leagueoflegends</td>
+      <td>I agree, and feel like TRM...may or may not ge...</td>
+      <td>agree feel like trm may may get lot unnecessar...</td>
+    </tr>
+    <tr>
+      <th>124</th>
+      <td>leagueoflegends</td>
+      <td>I kinda of have issue with putting blame on ju...</td>
+      <td>kinda issue putting blame one party yes agree ...</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 ### Collecting Gensim's Phrases
-
+Gensim's `Phrases` is a module designed for detecting and processing multi-word expressions within a text corpus, which is essential for enhancing natural language processing tasks. By identifying common phrases, such as "New York," as single entities rather than separate words, it improves the understanding of language context. The module employs statistical measures to evaluate the likelihood of word sequences forming phrases, allowing it to learn from the patterns present in the data. Once trained, the `Phrases` model can transform tokenized sentences, effectively combining recognized phrases into single tokens, which streamlines text preprocessing and enhances the performance of various NLP applications, including topic modeling and information retrieval. Overall, Gensim's `Phrases` significantly contributes to the quality and accuracy of text analysis by recognizing and processing complex language structures.
 ### Training Word2Vec
+The Word2Vec model was trained on this phrased corpus (corpus_phrased), where common multi-word expressions were merged with underscores.
 
-### K-Means Clustering
+We used the skip-gram architecture to learn embeddings that predict surrounding context words.
+
+The model had an embedding size of 100 dimensions, a window size of 5, ignored tokens that appeared fewer than 5 times, and was trained for 10 epochs.
 
 ### PCA
+Principal Component Analysis (PCA)  (Bishop, 2006) is a powerful statistical technique widely used in document analysis to reduce the dimensionality of large datasets while preserving as much variance as possible Bishop. By transforming the original variables into a new set of uncorrelated variables called principal components, PCA helps in identifying patterns and structures within the data. This is particularly useful in text mining and natural language processing, where documents can be represented as high-dimensional vectors. By applying PCA, researchers can enhance the efficiency of various tasks such as clustering, classification, and visualization of textual data, ultimately leading to more insightful analyses.
+### K-Means Clustering
+
 
 
 ### Setup 
@@ -101,5 +195,6 @@ Summarize the major outcomes of your project, reflect on the research findings, 
 
 ## References
 
-Include a list of academic and professional sources you cited in your report, using an appropriate citation format to ensure clarity and proper attribution.
 
+1. Srinivasa-Desikan, Bhargav (2018). *Natural Language Processing and Computational Linguistics: A practical guide to text analysis with Python, Gensim, spaCy, and Keras*. Packt Publishing Ltd.
+2. Bishop, Christopher M. (2006). *Pattern Recognition and Machine Learning (Information Science and Statistics)*. Springer-Verlag. Berlin, Heidelberg. ISBN: 0387310738.
