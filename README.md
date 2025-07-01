@@ -49,9 +49,11 @@ Our research primarily focus on gaming subreddits including 'leagueoflegends', '
 | zelda              | 1,182   |
 
 ## Methods
-
+[查看完整 Notebook 内容](./code/docana-project.ipynb)
 ### Preprocessing
+Firstly, we used the content text that doesn't include TL;DR part because it could bias the phrase extraction towards words that are common in summaries. Summaries often repeat key points in a condensed way rather than reflecting the natural flow of the document.
 
+We aimed to extract distinct phrases for each subreddit using a TF-IDF model. To improve the quality of the results, we first removed elements that are not useful for our task, such as links and stop words. In addition to stop words, we noticed that some phrases still appeared as important — for example, phrases like “quick play”, “ranked games”, or “playing overwatch”. To address this, we also removed certain domain-related words like “play”, “playing”, “game”, as well as the names of the games themselves, like "pokemon", "zelda", and "smash" etc., so that phrases containing these words would not dominate the results. Finally, we applied stemming to normalize word forms and avoid treating different surface forms of the same concept as distinct phrases.
 ### Collecting Gensim's Phrases
 
 ### Training Word2Vec
