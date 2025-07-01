@@ -25,7 +25,7 @@ Follow this steps to set up your project report:
 
 # Project Title
 
-_Group members: Name 1, Name 2, Name 3_
+Group members: Buket Sak, Anna Werner, Zeyuan Yu
 
 ## Introduction
 
@@ -33,9 +33,33 @@ Start off by setting the stage for your project. Give a brief overview of releva
 
 ## Dataset
 
-Provide a short description of the dataset used in your project. Focus on highlighting the aspects that are particularly relevant to your work.
+This corpus contains preprocessed posts from the Reddit dataset (Webis-TLDR-17). The dataset consists of 3,848,330 posts with an average length of 270 words for content, and 28 words for the summary.
+
+Features includes strings: author, body, normalizedBody, content, summary, subreddit, subreddit_id. Content is used as document and summary is used as summary.
+
+Our research primarily focus on gaming subreddits including 'leagueoflegends', 'pokemon', 'zelda', 'Overwatch', 'smashbros'and 'hearthstone' and they have relatively large amount of post to research on.
+
+| Subreddit          | Count   |
+|--------------------|---------|
+| leagueoflegends    | 109,307 |
+| hearthstone        | 9,500   |
+| pokemon            | 6,464   |
+| smashbros          | 4,464   |
+| Overwatch          | 3,633   |
+| zelda              | 1,182   |
 
 ## Methods
+
+### Preprocessing
+
+### Collecting Gensim's Phrases
+
+### Training Word2Vec
+
+### K-Means Clustering
+
+### PCA
+
 
 ### Setup 
 
