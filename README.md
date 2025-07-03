@@ -1,27 +1,4 @@
 
-## Project Report Template
-
-> This repository serves as a template for your project reports as part of the Document Analysis lecture. To set up your project report as a webpage using GitHub Pages, simply follow the steps outlined in the next chapter.
->
->**Some Organizational Details:** Get creative with your project ideas! Just make sure they relate to Natural Language Processing and incorporate this specified dataset: [Link to data](https://huggingface.co/datasets/webis/tldr-17), [Link to paper](https://aclanthology.org/W17-4508.pdf). Submissions should be made in teams of 2-3 students. Each team is expected to create a blog-style project website, using GitHub Pages, to present their findings. Additionally, teams will deliver a lightning talk during the final lecture to discuss their project. Add all your code, such as Python scripts and Jupyter notebooks, to the `code` folder. Use markdown files for your project report. [Here](https://docs.gitlab.com/ee/user/markdown.html) you can read about how to format Markdown documents. 
->
->Have fun working on your project! 🥳
-
-## Setup The Report Template
-
-Follow this steps to set up your project report:
-
-1. **Fork the Repository:** Begin by creating a copy of this repository for your own use. Click the `Fork` button at the top right corner of this page to do this.
-
-2. **Configure GitHub Pages:** Navigate to `Settings` -> `Pages` in your newly forked repository. Under the `Branch` section, change from `None` to `master` and then click `Save`.
-
-3. **Customize Configuration:** Modify the `_config.yml` file within your repository to personalize your site. Update the `title:` to reflect the title of your project and adjust the `description:` to provide a brief summary.
-
-4. **Start Writing:** Start writing your report by modifying the `README.md`. You can also add new Markdown files for additional pages by modifying the `_config.yml` file. Use the standard [GitHub Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) for formatting. 
-
-5. **Access Your Site:** Return to `Settings` -> `Pages` in your repository to find the URL to your live site. It typically takes a few minutes for GitHub Pages to build and publish your site after updates. The URL to access your live site follows this schema: `https://<<username>>.github.io/<<repository_name>>/`
-
-***
 
 # Project Title
 
@@ -29,7 +6,7 @@ Group members: Buket Sak, Anna Werner, Zeyuan Yu
 
 ## Introduction
 
-Start off by setting the stage for your project. Give a brief overview of relevant studies or work that have tackled similar issues. Then, clearly describe the main question or problem your project is designed to solve.
+TBD
 
 ## Dataset
 
@@ -143,7 +120,7 @@ df_games[['subreddit', 'body', 'cleaned_body']].head()
 
 
 ### Collecting Gensim's Phrases
-Gensim's `Phrases` is a module designed for detecting and processing multi-word expressions within a text corpus, which is essential for enhancing natural language processing tasks. By identifying common phrases, such as "New York," as single entities rather than separate words, it improves the understanding of language context. The module employs statistical measures to evaluate the likelihood of word sequences forming phrases, allowing it to learn from the patterns present in the data. Once trained, the `Phrases` model can transform tokenized sentences, effectively combining recognized phrases into single tokens, which streamlines text preprocessing and enhances the performance of various NLP applications, including topic modeling and information retrieval. Overall, Gensim's `Phrases` significantly contributes to the quality and accuracy of text analysis by recognizing and processing complex language structures.
+Gensim's Phrases is a module designed for detecting and processing multi-word expressions within a text corpus, which is essential for enhancing natural language processing tasks. By identifying common phrases, such as "New York," as single entities rather than separate words, it improves the understanding of language context. The module employs statistical measures to evaluate the likelihood of word sequences forming phrases, allowing it to learn from the patterns present in the data. Once trained, the Phrases model can transform tokenized sentences, effectively combining recognized phrases into single tokens, which streamlines text preprocessing and enhances the performance of various NLP applications, including topic modeling and information retrieval. Overall, Gensim's Phrases significantly contributes to the quality and accuracy of text analysis by recognizing and processing complex language structures.
 ### Training Word2Vec
 The Word2Vec model was trained on this phrased corpus (corpus_phrased), where common multi-word expressions were merged with underscores.
 
@@ -152,31 +129,121 @@ We used the skip-gram architecture to learn embeddings that predict surrounding 
 The model had an embedding size of 100 dimensions, a window size of 5, ignored tokens that appeared fewer than 5 times, and was trained for 10 epochs.
 
 ### PCA
-Principal Component Analysis (PCA)  (Bishop, 2006) is a powerful statistical technique widely used in document analysis to reduce the dimensionality of large datasets while preserving as much variance as possible Bishop. By transforming the original variables into a new set of uncorrelated variables called principal components, PCA helps in identifying patterns and structures within the data. This is particularly useful in text mining and natural language processing, where documents can be represented as high-dimensional vectors. By applying PCA, researchers can enhance the efficiency of various tasks such as clustering, classification, and visualization of textual data, ultimately leading to more insightful analyses.
+Principal Component Analysis (PCA)  (Bishop, 2006) is a powerful statistical technique widely used in document analysis to `reduce the dimensionality` of large datasets while preserving as much variance as possible Bishop. By transforming the original variables into a new set of uncorrelated variables called principal components, PCA helps in identifying patterns and structures within the data. This is particularly useful in text mining and natural language processing, where documents can be represented as high-dimensional vectors. By applying PCA, researchers can enhance the efficiency of various tasks such as clustering, classification, and visualization of textual data, ultimately leading to more insightful analyses.
 ### K-Means Clustering
+K-Means clustering is a widely used unsupervised machine learning algorithm that partitions a dataset into distinct groups, or clusters, based on feature similarity. In the context of text analysis, K-Means is particularly effective for organizing large volumes of textual data, such as the posts from gaming subreddits analyzed in this report. By grouping similar documents, K-Means facilitates the identification of underlying patterns and themes within the data, enabling researchers to gain insights into user discussions and trends. The algorithm operates by iteratively assigning data points to the nearest cluster centroid and updating the centroids based on the mean of the assigned points, ultimately converging to a stable solution. This method is especially beneficial in natural language processing tasks, where it can enhance the understanding of complex language structures and improve the performance of various applications, including topic modeling and information retrieval (MacQueen, 1967).
 
+### Emotion/Sentiment Classification
+To quantify emotional responses in subreddit posts, particularly anger, we used pretrained transformer models from HuggingFace. These models allowed us to extract nuanced emotional and sentiment signals from Reddit comments.
+
+#### Emotion Detection with DistilRoBERTa
+
+We employed the `j-hartmann/emotion-english-distilroberta-base` model to classify each Reddit comment into one of seven emotion categories: anger, joy, sadness, fear, disgust, surprise, and neutral. The model outputs emotion probabilities, enabling us to use anger probability as a continuous dependent variable.
+
+#### Why DistilRoBERTa?
+
+- **Computational Efficiency**: DistilRoBERTa is computationally efficient while retaining ~97% of RoBERTa’s classification performance.
+- **Emotion-specific Granularity**: It helps detect frustration, especially in multiplayer or competitive contexts.
+- **Neutral Class Importance**: The neutral class is critical for distinguishing emotionally charged posts from mundane or off-topic ones.
 
 
 ### Setup 
 
+We used Kaggle and Google Colab to conduct experiment with the dataset
 
-Outline the tools, software, and hardware environment, along with configurations used for conducting your experiments. Be sure to document the Python version and other dependencies clearly. Provide step-by-step instructions on how to recreate your environment, ensuring anyone can replicate your setup with ease:
-
-```bash
-conda create --name myenv python=<version>
-conda activate myenv
-```
-
-Include a `requirements.txt` file in your project repository. This file should list all the Python libraries and their versions needed to run the project. Provide instructions on how to install these dependencies using pip, for example:
-
-```bash
-pip install -r requirements.txt
-```
 
 ### Experiments
 
+
 Report how you conducted the experiments. We suggest including detailed explanations of the preprocessing steps and model training in your project. For the preprocessing, describe  data cleaning, normalization, or transformation steps you applied to prepare the dataset, along with the reasons for choosing these methods. In the section on model training, explain the methodologies and algorithms you used, detail the parameter settings and training protocols, and describe any measures taken to ensure the validity of the models.
 
+#### PCA
+
+Since the embeddings are high-dimensional, we applied Principal Component Analysis (PCA) to reduce them to 2 dimensions (X_reduced) for visualization.
+
+
+```python
+import numpy as np
+import plotly.express as px
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+import pandas as pd
+import plotly.io as pio
+```
+
+
+```python
+# Filter to only those in the vocab
+valid_phrases = [p for p in unique_phrases if p in w2v_model.wv]
+
+# Get their vectors
+X = np.array([w2v_model.wv[p] for p in valid_phrases])
+
+# Reduce to 2D
+pca = PCA(n_components=2)
+X_reduced = pca.fit_transform(X)
+
+# Set Plotly renderer
+pio.renderers.default = 'notebook'
+
+# Check data availability
+#print(X_reduced.shape)
+#print(valid_phrases)
+
+# Create a DataFrame for Plotly
+pca_df = pd.DataFrame({
+    'x': X_reduced[:, 0],
+    'y': X_reduced[:, 1],
+    'phrase': valid_phrases
+})
+
+# Create interactive scatter plot
+fig = px.scatter(
+    pca_df, 
+    x='x', 
+    y='y', 
+    text='phrase', #if this commented out, no text will show unless mouseover
+    #hover_name='phrase',  # Show phrase on hover
+    hover_data=['phrase'],  # Shows phrase on hover
+    title="Interactive 2D PCA Visualization of Subreddit Bigrams"
+)
+
+# Adjust text position and size
+fig.update_traces(
+    textposition='top center',
+    textfont_size=10,
+    marker=dict(size=8)
+)
+
+# Add axis labels
+fig.update_layout(
+    xaxis_title="PCA 1",
+    yaxis_title="PCA 2",
+    hovermode='closest'
+)
+
+# Show the figure
+fig.show(renderer='iframe')
+```
+
+
+<iframe
+    scrolling="no"
+    width="100%"
+    height="545px"
+    src="iframe_figures/figure_21.html"
+    frameborder="0"
+    allowfullscreen
+></iframe>
+
+
+<iframe src="{{ site.baseurl }}/figures/figure_21.html" width="100%" height="500"></iframe>
+
+Phrases that appear close together likely have similar meanings or occur in similar contexts in subreddit data.
+
+Phrases that are far apart are less related in terms of usage/context.
+
+Since TfidfVectorizer was set to ngram_range=(2, 2), it only considered bigrams. As a result, all the top terms I extracted were bigrams in PCA. 
 ## Results and Discussion
 
 Present the findings from your experiments, supported by visual or statistical evidence. Discuss how these results address your main research question.
