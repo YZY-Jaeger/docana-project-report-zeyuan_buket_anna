@@ -231,7 +231,7 @@ fig.show(renderer='iframe')
     scrolling="no"
     width="100%"
     height="545px"
-    src="iframe_figures/figure_21.html"
+    src="{{ site.baseurl }}/iframe_figures/figure_21.html"
     frameborder="0"
     allowfullscreen
 ></iframe>
@@ -244,6 +244,69 @@ Phrases that appear close together likely have similar meanings or occur in simi
 Phrases that are far apart are less related in terms of usage/context.
 
 Since TfidfVectorizer was set to ngram_range=(2, 2), it only considered bigrams. As a result, all the top terms I extracted were bigrams in PCA. 
+
+### K-Means Clustering with Similar Word2vec embeddings
+
+
+```python
+# Create DataFrame for plotting
+n_clusters = 6  # adjust this
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+labels = kmeans.fit_predict(X)
+
+pca_cluster_word2vec_df = pd.DataFrame({
+    'x': X_reduced[:, 0],
+    'y': X_reduced[:, 1],
+    'phrase': valid_terms,
+    'cluster': labels.astype(str)
+})
+
+# Plotly scatter plot
+fig = px.scatter(
+    pca_cluster_word2vec_df,
+    x='x',
+    y='y',
+    color='cluster',
+    #text='phrase',
+    hover_data=['phrase'],
+    title="K-Means Clustering of Phrases + Similar Terms (PCA Reduced)",
+    color_discrete_sequence=px.colors.qualitative.Safe
+)
+
+fig.update_traces(
+    textposition='top center',
+    textfont_size=10,
+    marker=dict(size=8, line=dict(width=0.5, color='black'))
+)
+
+fig.update_layout(
+    xaxis_title="PCA 1",
+    yaxis_title="PCA 2",
+    hovermode='closest',
+    legend_title="Cluster"
+)
+
+fig.show(renderer='iframe')
+```
+
+    /usr/local/lib/python3.11/dist-packages/sklearn/cluster/_kmeans.py:870: FutureWarning:
+    
+    The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
+    
+    
+
+
+<iframe
+    scrolling="no"
+    width="100%"
+    height="545px"
+    src="{{ site.baseurl }}/figures/figure_24.html"
+    frameborder="0"
+    allowfullscreen
+></iframe>
+
+
+
 ## Results and Discussion
 
 Present the findings from your experiments, supported by visual or statistical evidence. Discuss how these results address your main research question.
