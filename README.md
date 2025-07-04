@@ -253,13 +253,13 @@ fig.show(renderer='iframe')
     scrolling="no"
     width="100%"
     height="545px"
-    src="{{ site.baseurl }}/iframe_figures/figure_21.html"
+    src="{{ site.baseurl }}/figures/figure_21.html"
     frameborder="0"
     allowfullscreen
 ></iframe>
 
 
-<iframe src="{{ site.baseurl }}/figures/figure_21.html" width="100%" height="500"></iframe>
+
 
 Phrases that appear close together likely have similar meanings or occur in similar contexts in subreddit data.
 
