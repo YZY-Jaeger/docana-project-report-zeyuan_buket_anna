@@ -4,7 +4,7 @@
 
 Group members: Buket Sak, Anna Werner, Zeyuan Yu
 
-## Introduction
+## Introduction - P1
 
 Online gaming communities have become vibrant spaces where players interact, share experiences, and form collective identities. Reddit, as a popular platform hosting a diverse range of gaming subreddits, offers a rich opportunity to study how language reflects and shapes these unique gaming cultures. Each subreddit not only discusses gameplay and strategies but also develops its own distinctive language patterns, emotional expressions, and thematic references that define its community.
 
@@ -29,6 +29,29 @@ Hyptheses:
 2. Word2Vec embeddings will capture meaningful semantic relationships between phrases, such that subreddits with overlapping gameplay styles will show similar phrase neighborhoods, while distinct communities will form separate clusters in the embedding space.
 
 3. Game terms that share more features may reflect similar emotional patterns in phrase usage across communities.
+
+
+## Introduction - P2
+
+Previously, we conducted a TF-IDF analysis on several gaming-related subreddits to identify key terms and examined the sentiment of the sentences in which these terms appeared. This exploratory work suggested a connection between team play and emotional responses in gamer discussions. Building on this, and supported by existing research, we focus here on how anger expressions relate to game type, subreddit, and genre groups.
+
+The literature highlights that playing with weak teammates elicits anger (Greitemeyer & Mügge, 2014), situating this project within the broader framework of the General Learning Model (GLM). The GLM posits that video game content strongly influences social behavior—violent games tend to increase aggression and reduce prosocial behavior, while prosocial games promote the opposite effects. These effects are bidirectional and can manifest both immediately and over long-term repeated exposure.
+
+Meta-analyses (e.g., Anderson et al., 2010) have confirmed that violent video games increase aggressive thoughts, emotions, and behaviors while decreasing empathy and helping tendencies. Since cooperative behavior and empathy counteract aggression (Eron & Huesmann, 1984), it is plausible that playing violent games cooperatively might reduce aggressive responses.
+
+Motivated by these findings and the theoretical framework, this project investigates whether cooperative gameplay moderates anger expressions in online gaming discourse. Specifically, we examine if cooperative modes attenuate anger compared to non-cooperative modes across different game types and subreddit contexts.
+
+**Research Questions:**
+1. Does team play increase anger level expressed in subreddit gaming communities?
+2. Does cooperative gameplay reduce anger expression in gaming communities?
+
+**Hypotheses:**
+
+- Hypothesis 1: Increased team play—i.e., games involving more players or multiplayer modes—is associated with higher anger expression.
+This hypothesis is inspired by evidence that playing with weak or frustrating teammates often elicits anger, especially in competitive multiplayer environments where coordination and performance matter. As the number of players increases, the potential for conflict, frustration, and thus anger may rise, reflected in the emotional content of online comments.
+- Hypothesis 2: Cooperative gameplay moderates anger expression, such that playing cooperatively reduces anger, particularly in genres or subreddit communities associated with violent or competitive content.
+Based on the General Learning Model (GLM) and empirical findings on prosocial game effects, cooperative play may buffer aggressive responses by fostering empathy and social bonding, thereby lowering anger expression despite violent or competitive game contexts.
+Together, these hypotheses aim to clarify the complex relationship between game mode (team size and cooperation), game content, and emotional reactions as reflected in gamer discourse online.
 
 ## Dataset
 
@@ -324,32 +347,48 @@ fig.show(renderer='iframe')
 ></iframe>
 
 
-### Sentiment Analysis
+### Sentiment Analysis (p2)
 
-We conduct phrase-focused sentiment analysis that:¶
 
-1. Finds subreddit-specific phrases in their respective comment sentences (e.g., "boss fight" in gaming subs)
-   
-2. Runs dual BERT analysis on those sentences
-   
-* one for emotions (anger/disgust/fear/joy/neutral/sadness/surprise)
-   
-* and one for sentiment (negative/neutral/positive)
+In our analysis, we examine how game metadata (e.g., mode_rank, has_coop, game_age, rating) affects the probability of anger expressed in comments of
+Reddit Gaming Communities, as identified by a DistilRoBERTa-based emotion classifier.
 
-  
-3. Creates insights about how communities feel when discussing specific subreddit-specific terms, rather than analyzing all text broadly
+Why [DistilRoBERTa](https://huggingface.co/j-hartmann/emotion-english-distilroberta-base)?
 
-DistilRoBERTa is a (compressed) version of RoBERTa that retains ~97% of the performance while being faster and more memory efficient. I was trained on 6 diverse emotion datasets and uses Ekman's basic emotions framework that covers the core human emotional responses. The 7 classes (6 emotions + neutral) give good granularity without being overwhelming, perfect for analyzing gaming community reactions. We especially appreciate that this model provides category 'neutral', since not necessarily all things said are laden with emotion.
+- Efficient yet accurate:
+DistilRoBERTa is a distilled version of RoBERTa, offering about 97% of the original’s emotion classification performance while being 60% smaller and faster, crucial for processing large datasets of gaming comments efficiently.
+- Emotion granularity:
+The model classifies text into seven categories (6 basic emotions + neutral) based on Ekman’s framework, allowing us to focus specifically on anger probability, a key emotion linked to user frustration or dissatisfaction in game discussions.
+- Neutral category importance:
+Many comments contain no strong emotional content; the neutral category captures these.
+Including neutral helps separate true emotional reactions (like anger) from neutral or off-topic remarks, improving the precision of modeling anger as an outcome variable.
+Ignoring neutral would risk conflating lack of emotion with low anger, biasing estimates and reducing interpretability.
 
-Twitter-RoBERTa-base is trained on ~124M tweets (2018-2021). Thus, it is closer to Reddit language than formal text and understands internet slang, abbreviations, and casual tone. Gaming communities likely use similar informal communication styles.
+Why Model Anger Probability?
 
-* DistilRoBERTa: Captures emotional nuance (anger vs sadness vs fear)
+Instead of simple binary classification, modeling probability scores of anger lets us capture the degree of emotional intensity in comments.
+This finer granularity enables us to detect subtle effects of game metadata on emotional responses both between subreddits (random effects) and within subreddit variation (fixed effects).
 
-* Twitter-RoBERTa: Captures overall sentiment polarity in social media context
 
-Make sure to set up GPU (in Kaggle):¶
+*For comparison/ For analyzing effects of player immersion (by perspective) on neutrality score (not implemented in this codebook):*
 
-* Settings → Accelerator → GPU T4x2
+Using [Twitter-RoBERTa](cardiffnlp/twitter-roberta-base-sentiment-latest)
+
+Twitter-RoBERTa is a RoBERTa-base model trained on over 124 million tweets, capturing modern social media language—including slang and informal expressions common in gaming discussions.
+
+- Sentiment granularity:
+It classifies text into three sentiment classes: Negative, Neutral, and Positive, perfectly matching the tone of gaming conversations.
+Why sentiment matters:
+While DistilRoBERTa captures specific emotions like anger, Twitter-RoBERTa summarizes the overall positive or negative sentiment of a comment, giving a broader picture of user attitudes toward game features.
+- Neutral category importance:
+The neutral class helps differentiate emotionally charged comments from neutral opinions, ensuring the model doesn’t confuse neutral feedback with positive or negative sentiment.
+- Complementing emotion analysis:
+Pairing Twitter-RoBERTa’s sentiment output with DistilRoBERTa’s emotion probabilities creates a richer understanding of gaming community reactions, distinguishing between general sentiment and specific emotions like anger or joy.
+
+
+We label the comments in df_sampled (max.500 sampled posts per gaming subreddit, given a subreddit has at least 100 posts).
+
+Make sure to enable GPU acceleration (e.g., Kaggle: Settings → Accelerator → GPU, Colab: Runtime → Change runtime type → GPU) and pass your models and data to the GPU to significantly speed up inference and handle large-scale emotion and sentiment classification efficiently.
 
 ## Results and Discussion
 
@@ -496,7 +535,7 @@ By focusing on the proportion, we can assess which sentiment is most frequently 
 
 #### Sentiment Distribution by Phrase 
 ![Sentiment Distribution by Phrase (Proportion)](figures/docana-project1_60_2.png)
-
+Taking one of the subreddit we researched on, r/leagueoflegends, as example, "elo hell" is used in online competitive gaming (such as league of legends) to describe a situation where players feel stuck in a lower rank or division than their skill level warrants, often due to factors outside their direct control. This frustration stems from the belief that teammates, matchmaking, or other external influences hinder their ability to climb the ranks, despite individual skill. 
 #### Emotion Distribution by Phrase 
 ![Emotion Distribution by Phrase in r/leagueoflegends](figures/docana-project1_68_5.png)
 
@@ -509,7 +548,11 @@ Here, again, most phrases had neutral sentiments, with only a few exceptions. Si
 
 ## Conclusion
 
-Summarize the major outcomes of your project, reflect on the research findings, and clearly state the conclusions you've drawn from the study.
+The TF-IDF analysis helped identify the most distinctive phrases across different gaming communities, highlighting key terms related to gameplay, competition, and player interactions. The Word2Vec embeddings revealed meaningful semantic relationships between phrases, uncovering clusters of related terms that reflect shared themes or characteristics within each gaming community.
+
+Our sentiment analysis of the TF-IDF phrases showed that most gaming discussions tend to be emotionally neutral rather than strongly positive or negative. While we observed some negatively charged terms, such as “people team” and “console players,” mostly from competitive multiplayer games, the limited number of phrases with clear positive or negative sentiment means we cannot draw definitive conclusions. Nonetheless, these initial findings highlight interesting emotional dynamics around game mechanics and competitiveness that motivate us to investigate these dynamics further.
+
+Limitations: There was an imbalance in our dataset, with the majority of comments coming from League of Legends, followed by Hearthstone, while other games had significantly fewer comments. This imbalance may have affected both the sentiment analysis and the overall results. Also the fact that we looked at the sentiment of sentences that TF-IDF phrases appeared in, means we only get approximation of how phrases tend to be used or discussed but not their standalone sentiment.
 
 ## Contributions
 
