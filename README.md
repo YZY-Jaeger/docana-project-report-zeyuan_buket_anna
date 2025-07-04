@@ -311,10 +311,6 @@ fig.update_layout(
 fig.show(renderer='iframe')
 ```
 
-    /usr/local/lib/python3.11/dist-packages/sklearn/cluster/_kmeans.py:870: FutureWarning:
-    
-    The default value of `n_init` will change from 10 to 'auto' in 1.4. Set the value of `n_init` explicitly to suppress the warning
-    
     
 
 
@@ -328,11 +324,191 @@ fig.show(renderer='iframe')
 ></iframe>
 
 
+### Sentiment Analysis
+
+We conduct phrase-focused sentiment analysis that:¶
+
+1. Finds subreddit-specific phrases in their respective comment sentences (e.g., "boss fight" in gaming subs)
+   
+2. Runs dual BERT analysis on those sentences
+   
+* one for emotions (anger/disgust/fear/joy/neutral/sadness/surprise)
+   
+* and one for sentiment (negative/neutral/positive)
+
+  
+3. Creates insights about how communities feel when discussing specific subreddit-specific terms, rather than analyzing all text broadly
+
+DistilRoBERTa is a (compressed) version of RoBERTa that retains ~97% of the performance while being faster and more memory efficient. I was trained on 6 diverse emotion datasets and uses Ekman's basic emotions framework that covers the core human emotional responses. The 7 classes (6 emotions + neutral) give good granularity without being overwhelming, perfect for analyzing gaming community reactions. We especially appreciate that this model provides category 'neutral', since not necessarily all things said are laden with emotion.
+
+Twitter-RoBERTa-base is trained on ~124M tweets (2018-2021). Thus, it is closer to Reddit language than formal text and understands internet slang, abbreviations, and casual tone. Gaming communities likely use similar informal communication styles.
+
+* DistilRoBERTa: Captures emotional nuance (anger vs sadness vs fear)
+
+* Twitter-RoBERTa: Captures overall sentiment polarity in social media context
+
+Make sure to set up GPU (in Kaggle):¶
+
+* Settings → Accelerator → GPU T4x2
 
 ## Results and Discussion
 
-Present the findings from your experiments, supported by visual or statistical evidence. Discuss how these results address your main research question.
 
+```python
+# Convert results to DataFrame
+phrase_sentiments_df = pd.DataFrame(results)
+# Save to Kaggle output directory
+phrase_sentiments_df.to_csv('/kaggle/working/phrase_sentiments.csv', index=False)
+print("Saved to /kaggle/working/phrase_sentiments.csv")
+
+# Optional: Save as parquet for better performance
+phrase_sentiments_df.to_parquet('/kaggle/working/phrase_sentiments_analysis.parquet', index=False)
+print("Saved to /kaggle/working/phrase_sentiments_analysis.parquet")
+
+# See summary statistics
+summary_stats = phrase_sentiments_df.groupby(['subreddit', 'phrase', 'emo_label', 'senti_label']).size().reset_index(name='count')
+summary_stats
+```
+
+    Saved to /kaggle/working/phrase_sentiments.csv
+    Saved to /kaggle/working/phrase_sentiments_analysis.parquet
+    
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>subreddit</th>
+      <th>phrase</th>
+      <th>emo_label</th>
+      <th>senti_label</th>
+      <th>count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Overwatch</td>
+      <td>alt fire</td>
+      <td>anger</td>
+      <td>negative</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Overwatch</td>
+      <td>alt fire</td>
+      <td>neutral</td>
+      <td>negative</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Overwatch</td>
+      <td>alt fire</td>
+      <td>neutral</td>
+      <td>neutral</td>
+      <td>24</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Overwatch</td>
+      <td>alt fire</td>
+      <td>neutral</td>
+      <td>positive</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Overwatch</td>
+      <td>alt fire</td>
+      <td>sadness</td>
+      <td>negative</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>3451</th>
+      <td>zelda</td>
+      <td>young link</td>
+      <td>joy</td>
+      <td>positive</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3452</th>
+      <td>zelda</td>
+      <td>young link</td>
+      <td>neutral</td>
+      <td>negative</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3453</th>
+      <td>zelda</td>
+      <td>young link</td>
+      <td>neutral</td>
+      <td>neutral</td>
+      <td>26</td>
+    </tr>
+    <tr>
+      <th>3454</th>
+      <td>zelda</td>
+      <td>young link</td>
+      <td>neutral</td>
+      <td>positive</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3455</th>
+      <td>zelda</td>
+      <td>young link</td>
+      <td>sadness</td>
+      <td>negative</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>3456 rows × 5 columns</p>
+</div>
+
+
+
+To better understand the sentiment associated with each phrase, we compute aggregated statistics based on all its occurrences in the data. Since the same phrase can appear in multiple sentences—sometimes with different sentiment labels and confidence scores—we summarize the results at the phrase level.
+
+For each (subreddit, phrase, sentiment label) combination, we calculate:
+
+* count: How many times the phrase appeared with this sentiment label
+    
+* avg_score: The average model confidence score for that sentiment
+    
+* proportion: The fraction of times this sentiment was assigned out of all sentiment assignments for that phrase
+
+By focusing on the proportion, we can assess which sentiment is most frequently associated with a phrase, regardless of variations in score.
 ## Conclusion
 
 Summarize the major outcomes of your project, reflect on the research findings, and clearly state the conclusions you've drawn from the study.
