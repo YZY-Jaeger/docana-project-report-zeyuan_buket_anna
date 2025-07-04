@@ -354,25 +354,7 @@ Make sure to set up GPU (in Kaggle):¶
 ## Results and Discussion
 
 
-```python
-# Convert results to DataFrame
-phrase_sentiments_df = pd.DataFrame(results)
-# Save to Kaggle output directory
-phrase_sentiments_df.to_csv('/kaggle/working/phrase_sentiments.csv', index=False)
-print("Saved to /kaggle/working/phrase_sentiments.csv")
-
-# Optional: Save as parquet for better performance
-phrase_sentiments_df.to_parquet('/kaggle/working/phrase_sentiments_analysis.parquet', index=False)
-print("Saved to /kaggle/working/phrase_sentiments_analysis.parquet")
-
-# See summary statistics
-summary_stats = phrase_sentiments_df.groupby(['subreddit', 'phrase', 'emo_label', 'senti_label']).size().reset_index(name='count')
-summary_stats
-```
-
-    Saved to /kaggle/working/phrase_sentiments.csv
-    Saved to /kaggle/working/phrase_sentiments_analysis.parquet
-    
+#### `Phrases and sentiment in different subreddits`
 
 
 
@@ -509,6 +491,22 @@ For each (subreddit, phrase, sentiment label) combination, we calculate:
 * proportion: The fraction of times this sentiment was assigned out of all sentiment assignments for that phrase
 
 By focusing on the proportion, we can assess which sentiment is most frequently associated with a phrase, regardless of variations in score.
+
+
+
+#### Sentiment Distribution by Phrase 
+![Sentiment Distribution by Phrase (Proportion)](figures/docana-project1_60_2.png)
+
+#### Emotion Distribution by Phrase 
+![Emotion Distribution by Phrase in r/leagueoflegends](figures/docana-project1_68_5.png)
+
+Here, again, most phrases had neutral sentiments, with only a few exceptions. Since these non-neutral phrases are limited in number. We also examined the second most dominant emotions to gain a better understanding.
+
+#### Second Dominant Emotion
+![Second Dominant Emotion](figures/docana-project1_73_0.png)
+
+
+
 ## Conclusion
 
 Summarize the major outcomes of your project, reflect on the research findings, and clearly state the conclusions you've drawn from the study.
