@@ -256,7 +256,7 @@ fig.update_layout(
 
 # Show the plot
 fig.show(renderer='iframe')
-
+```
 
 
 <iframe
@@ -586,14 +586,13 @@ Limitations: There was an imbalance in our dataset, with the majority of comment
 
 ## Conclusion (p2)
 
+
 This analysis explored how game metadata—particularly game mode (e.g., multiplayer/cooperative play), game age, and user rating—relate to anger probability scores derived from an emotion classifier (emoBERT) applied to Reddit gaming comments. Guided by the General Learning Model (GLM) (Buckley and Anderson, 2006) and prior findings in favor of teamplay effects (Behnke et al., 2021, Smith et al., 2019), we focused on two main research questions:
 
 - Does increased team play (higher multiplayer involvement) increase anger expression in subreddit gaming communities, and
 - Does cooperative gameplay reduce such anger expression?
 
-Using a linear mixed-effects model with random intercepts for author, subreddit, and combined genre to account for nested data and unobserved heterogeneity, we modeled fixed effects for multiplayer rank, cooperative mode, game age, and rating. Results partially supported the hypotheses: higher multiplayer ranking was generally associated with increased anger, consistent with the first hypothesis.
-
-However, the interaction between multiplayer rank and cooperative mode revealed that cooperative play increased anger expression at lower multiplayer levels — suggesting that cooperation may increase anger in smaller team settings. At higher multiplayer levels, the mitigating effect of cooperative team play emerged. However, confidence interval overlap, indicating more complex social dynamics possibly influenced by other unmeasured factors.
+Using a linear mixed-effects model with random intercepts for author, subreddit, and combined genre to account for nested data and unobserved heterogeneity, we modeled fixed effects for multiplayer rank, cooperative mode, game age, and rating. Results partially supported the hypotheses. Higher multiplayer ranking was generally associated with increased anger, consistent with the first hypothesis, but not significant. However, the interaction between multiplayer rank and cooperative mode revealed that cooperative play increased anger expression at lower multiplayer levels — suggesting that cooperation may increase anger in smaller team settings. At higher multiplayer levels, the mitigating effect of cooperative team play emerged. Still, confidence interval overlap, indicating more complex social dynamics possibly influenced by other unmeasured factors.
 
 Furthermore, our multilevel model reveladed only little variation of anger between subreddits, and even less so between genres of the associated games.
 
@@ -601,7 +600,7 @@ Several limitations temper these conclusions. Measurement errors in the IGDB met
 
 Furthermore, the Reddit gaming community represents a selective and emotionally expressive population, limiting the generalizability of findings. The comment-level approach, without user or game-level aggregation, may inflate significance due to non-independence of observations. Crucially, the lack of data distinguishing online versus offline cooperative play restricts interpretation of the cooperation effect, as these contexts likely differ substantially in social dynamics.
 
-**In conclusion**, our findings offer preliminary support the GLM’s framework: cooperative gameplay can attenuate anger expression in online gaming discourse, especially in less complex multiplayer contexts. The data also confirm that increased multiplayer involvement tends to raise anger expression, aligning with expectations about team-based frustrations. Future research should refine metadata quality, incorporate richer contextual variables, and examine these dynamics across more representative gaming populations and interaction types. Despite limitations, this study demonstrates the value of integrating emotion classification with detailed game metadata to illuminate the social-emotional effects of video game play in real-world online communities.
+**In conclusion**, our findings offer preliminary support the GLM’s framework: cooperative gameplay can attenuate anger expression in online gaming discourse, especially in less complex multiplayer contexts. The data also suggests that increased multiplayer involvement tends to raise anger expression, aligning with expectations about team-based frustrations, though our findings here were not significant. Future research should refine metadata quality, incorporate richer contextual variables, and examine these dynamics across more representative gaming populations and interaction types. Despite limitations, this study demonstrates the value of integrating emotion classification with detailed game metadata to illuminate the social-emotional effects of video game play in real-world online communities.
 
 ## Contributions
 
