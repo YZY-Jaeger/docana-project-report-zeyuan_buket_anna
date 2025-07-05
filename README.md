@@ -55,7 +55,7 @@ This reflects evidence that coordination failures and frustrating teammates ofte
 - H2: Cooperative gameplay reduces anger expression.
 Drawing on the GLM and research on prosocial games, cooperative play may foster empathy and social bonding, thereby buffering against anger—even in violent or competitive contexts.
 
-## Dataset
+## Dataset (Webis-TLDR-17)
 
 This corpus contains preprocessed posts from the Reddit dataset (Webis-TLDR-17). The dataset consists of 3,848,330 posts with an average length of 270 words for content, and 28 words for the summary.
 
@@ -72,9 +72,29 @@ Our research primarily focus on gaming subreddits including 'leagueoflegends', '
 | Overwatch          | 3,633   |
 | zelda              | 1,182   |
 
+
+## Dataset (IGDB database)
+
+We now substantially expand our game metadata beyond basic information, creating a foundation for analysing what drives sentiment in gaming subreddits:
+**Core Game Metadata**
+
+*Genres:* Multi-category classification from both RAWG.io and IGDB systems
+*Similar Games:* Network of related games (by game ID) for similarity analysis
+Game Modes: Single-player, multiplayer, co-op capabilities
+Release Information: First release date for temporal analysis
+Game Descriptions: Detailed summaries for text mining
+
+Advanced Metadata (New)
+
+Rating Systems: Multiple rating metrics (aggregated_rating, total_rating, player ratings)
+Keywords: Specific game mechanics, features, and descriptors
+Themes: Narrative and aesthetic themes (horror, fantasy, sci-fi, etc.)
+Platforms: Gaming system availability and exclusivity patterns
+Player Perspectives: First-person, third-person, isometric viewpoints
+Multiplayer Modes: Detailed co-op features, online/offline capabilities, max players
 ## Methods
 
-### Preprocessing
+### Preprocessing (p1)
 Firstly, we used the content text that doesn't include TL;DR part because it could bias the phrase extraction towards words that are common in summaries. Summaries often repeat key points in a condensed way rather than reflecting the natural flow of the document.
 
 We aimed to extract distinct phrases for each subreddit using a TF-IDF model. To improve the quality of the results, we first removed elements that are not useful for our task, such as links and stop words. In addition to stop words, we noticed that some phrases still appeared as important — for example, phrases like “quick play”, “ranked games”, or “playing overwatch”. To address this, we also removed certain domain-related words like “play”, “playing”, “game”, as well as the names of the games themselves, like "pokemon", "zelda", and "smash" etc., so that phrases containing these words would not dominate the results. Finally, we applied stemming to normalize word forms and avoid treating different surface forms of the same concept as distinct phrases.
@@ -575,6 +595,155 @@ Here, again, most phrases had neutral sentiments, with only a few exceptions. Si
 
 
 
+### 4.1.2 Explore Dependent Variable by Subreddit
+
+
+```python
+# emoBERT_anger by selected subreddits, ordered by mean
+
+# Selected subreddits -  based on First Part of Project
+selected = ['leagueoflegends', 'pokemon', 'zelda', 'overwatch', 'smashbros', 'hearthstone']
+
+# Get summary stats for emoBERT_anger
+summary_anger = comment_df.groupby('subreddit', observed=True)['emoBERT_anger'].agg(['mean'])
+
+# Get 5 subreddits with lowest and highest mean anger
+lowest_anger = summary_anger.sort_values(by='mean').head(5).index.tolist()
+highest_anger = summary_anger.sort_values(by='mean').tail(5).index.tolist()
+
+# Combine with your selected list (removing duplicates)
+combined_anger_subreddits = list(set(selected + lowest_anger + highest_anger))
+
+# Filter the dataframe to just those subreddits
+subset_anger = comment_df[comment_df['subreddit'].isin(combined_anger_subreddits)]
+
+# Sort subreddit order by mean emoBERT_anger
+ordered_anger = subset_anger.groupby('subreddit', observed=True)['emoBERT_anger'].mean().sort_values().index.tolist()
+
+# Boxplot
+plt.figure(figsize=(12, 6))
+sns.boxplot(data=subset_anger, x='subreddit', y='emoBERT_anger',
+               palette='coolwarm', order=ordered_anger)
+plt.title("Distribution of 'emoBERT_anger' for Selected + Extreme Subreddits")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# Violin plot
+plt.figure(figsize=(12, 6))
+sns.violinplot(data=subset_anger, x='subreddit', y='emoBERT_anger',
+               inner='box', palette='coolwarm', order=ordered_anger)
+plt.title("Distribution of 'emoBERT_anger' for Selected + Extreme Subreddits")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](code/docana_project_part2_files/docana_project_part2_57_0.png)
+    
+
+
+
+    
+![png](code/docana_project_part2_files/docana_project_part2_57_1.png)
+    
+
+
+### 4.1.3 Explore Dependent Variable by Genre
+
+
+```python
+# Show combined_genres
+
+# Count frequency of combined genres
+combined_genre_counts = comment_df['combined_genre'].value_counts()
+
+# Plot
+plt.figure(figsize=(14, 8))
+plt.bar(combined_genre_counts.index, combined_genre_counts.values, color='#D3D3D3', edgecolor='black')
+plt.title('Combined Genre Distribution')
+plt.ylabel('Count')
+plt.xticks(rotation=45, ha='right')  # rotate x labels for readability
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.gca().set_axisbelow(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](code/docana_project_part2_files/docana_project_part2_59_0.png)
+    
+
+
+
+```python
+# emoBERT_anger by genres, ordered by mean
+ordered_genres_anger = comment_df.groupby('combined_genre')['emoBERT_anger'].mean().sort_values().index.tolist()
+
+# Plot
+plt.figure(figsize=(14, 6))
+sns.boxplot(data=comment_df, x='combined_genre', y='emoBERT_anger',
+            palette='coolwarm', order=ordered_genres_anger)
+plt.title("Distribution of 'emoBERT_anger' by Combined Genre (Original)")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](code/docana_project_part2_files/docana_project_part2_60_0.png)
+    
+
+
+
+```python
+# Proportion of top-labelled outcome class
+# Count occurrences of each emoBERT_top_label by combined_genre
+df_emo_counts = comment_df.groupby(['combined_genre', 'emoBERT_top_label']).size().unstack(fill_value=0)
+
+# Compute proportions per genre (row-wise normalization)
+df_emo_prop = df_emo_counts.div(df_emo_counts.sum(axis=1), axis=0)
+
+# Sort genres by 'anger' proportion descending
+sorted_genres = df_emo_prop.sort_values(by='anger', ascending=False).index
+
+# Reorder both dfs accordingly
+df_emo_prop_sorted = df_emo_prop.loc[sorted_genres]
+df_emo_counts_sorted = df_emo_counts.loc[sorted_genres]
+
+# Define colors
+emo_colors = ['#ffb3b3', '#ffcc99', '#b3d9ff', '#98df8a', '#c5b0d5', '#d4c5a9', '#b3e5d1']
+
+plt.figure(figsize=(16, 8))
+
+# Left plot: Proportions
+plt.subplot(1, 2, 1)
+df_emo_prop_sorted.plot(kind='barh', stacked=True, color=emo_colors, ax=plt.gca())
+plt.title("Proportions of emoBERT_top_label (sorted by anger)")
+plt.xlabel("Proportion")
+plt.ylabel("Combined Genre")
+plt.legend().remove()
+
+# Right plot: Absolute counts
+plt.subplot(1, 2, 2)
+df_emo_counts_sorted.plot(kind='barh', stacked=True, color=emo_colors, ax=plt.gca())
+plt.title("Total Count of emoBERT_top_label (sorted by anger)")
+plt.xlabel("Count")
+plt.ylabel("")
+plt.legend(title="Emotion Label", loc='upper right')
+
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](code/docana_project_part2_files/docana_project_part2_61_0.png)
 ## Conclusion (p1)
 
 The TF-IDF analysis helped identify the most distinctive phrases across different gaming communities, highlighting key terms related to gameplay, competition, and player interactions. The Word2Vec embeddings revealed meaningful semantic relationships between phrases, uncovering clusters of related terms that reflect shared themes or characteristics within each gaming community.
@@ -583,7 +752,85 @@ Our sentiment analysis of the TF-IDF phrases showed that most gaming discussions
 
 Limitations: There was an imbalance in our dataset, with the majority of comments coming from League of Legends, followed by Hearthstone, while other games had significantly fewer comments. This imbalance may have affected both the sentiment analysis and the overall results. Also the fact that we looked at the sentiment of sentences that TF-IDF phrases appeared in, means we only get approximation of how phrases tend to be used or discussed but not their standalone sentiment.
 
+### 4.2 Model Fitting and Visualization of Effects
 
+We use **rpy2** to call R code from within Python, enabling us to leverage R’s statistical packages without leaving the Python environment. In particular, we use lme4, which is a widely used R package for fitting linear and generalized linear mixed-effects models.
+
+Why **lme4**?
+Mixed-effects models allow us to account for both fixed effects (e.g., game metadata like mode_rank, has_coop) and random effects (e.g., variation between subreddits, authors, and game genres). This is crucial for handling hierarchical or grouped data structures and properly modeling between- and within-group variance, which standard regression methods can’t capture.
+
+The snippet installs lme4 if missing, loads the package, and fits a mixed-effects model predicting the anger emotion score with relevant fixed and random effects.
+
+
+
+The linear mixed-effects model shows that the presence of cooperative gameplay (has_coop) is significantly associated with a higher anger probability score, while the interaction between mode_rank and has_coop is negative and significant, suggesting that the effect of game mode rank on anger depends on whether the game includes cooperative play.
+
+Random effects for author, subreddit, and combined_genre capture some variability, with the largest variance at the author level, indicating individual differences in anger expression.
+
+Fixed effects alone explain a small portion of variance (R² ≈ 0.003), but including random effects improves the explained variance (R² ≈ 0.172), highlighting the importance of accounting for hierarchical structure in the data.
+
+Other predictors like game_age and rating show no significant effects here.
+
+Back to Python:
+
+
+```python
+# Data
+model_df = pd.DataFrame(model_results)
+pred_df = pd.DataFrame(predictions)
+
+# Plot: Interaction Effects
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Create the line plot
+sns.lineplot(data=model_df, x='mode_rank', y='predicted', hue='has_coop',
+             marker='o', markersize=10, linewidth=3,
+             palette=['#6495ED', '#483D8B'])
+
+# Add confidence intervals
+for coop_val, color in zip([0, 1], ['#6495ED', '#483D8B']):
+    subset = model_df[model_df['has_coop'] == coop_val]
+    ax.fill_between(subset['mode_rank'], subset['conf_low'], subset['conf_high'],
+                    alpha=0.15, color=color)
+
+# Styling
+ax.set_xlabel('Mode Rank', fontsize=14)
+ax.set_ylabel('Predicted Probability of Anger', fontsize=14)
+ax.set_title('Average Effects of Play Mode on Probability of Anger Sentiment',
+             fontsize=16, fontweight='bold', pad=20)
+
+# Customize axes
+ax.set_xticks([1, 2, 3, 4, 5])
+ax.set_xlim(0.9, 5.1)
+ax.tick_params(axis='both', which='major', labelsize=12)
+
+# Add grid
+ax.grid(True, linestyle='--', alpha=0.7, linewidth=0.8)
+ax.set_axisbelow(True)
+
+# Legend
+handles, labels = ax.get_legend_handles_labels()
+legend = ax.legend(handles, ['No Co-op', 'Has Co-op'],
+                   title='Cooperative Mode',
+                   title_fontsize=12, fontsize=11,
+                   loc='upper right', frameon=True,
+                   fancybox=True, shadow=True)
+#legend.get_title().set_fontweight('bold')
+
+# Add subtle background color
+#ax.set_facecolor('#fafafa')
+
+plt.tight_layout()
+plt.show()
+```
+
+
+    
+![png](code/docana_project_part2_files/docana_project_part2_74_0.png)
+    
+
+
+When plotting the predicted anger probabilities for multiplayer games with and without cooperative play, we observe that at mode rank 1 (single-player), the confidence intervals do not overlap, indicating a statistically meaningful difference in anger levels between these groups. However, for higher mode ranks (2 and above), the confidence intervals overlap, suggesting that the differences in anger probabilities between cooperative and non-cooperative games become less distinct and are not statistically significant at those levels. This pattern highlights that the cooperative effect on anger is most pronounced in single-player or lower mode ranks, but diminishes as the mode complexity increases.
 ## Conclusion (p2)
 
 
