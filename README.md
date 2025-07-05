@@ -35,23 +35,25 @@ Hyptheses:
 
 Previously, we conducted a TF-IDF analysis on several gaming-related subreddits to identify key terms and examined the sentiment of the sentences in which these terms appeared. This exploratory work suggested a connection between team play and emotional responses in gamer discussions. Building on this, and supported by existing research, we focus here on how anger expressions relate to game type, subreddit, and genre groups.
 
-The literature highlights that playing with weak teammates elicits anger (Greitemeyer & Mügge, 2014), situating this project within the broader framework of the General Learning Model (GLM). The GLM posits that video game content strongly influences social behavior—violent games tend to increase aggression and reduce prosocial behavior, while prosocial games promote the opposite effects. These effects are bidirectional and can manifest both immediately and over long-term repeated exposure.
+Meta-analyses (e.g., Anderson et al., 2010) have shown that violent video games increase aggression while reducing empathy and prosocial behavior.
+This situates this project within the broader framework of the General Learning Model (GLM), as proposd by Buckley and Anderson (2006). The GLM posits that video game content strongly influences social behavior — violent games tend to increase aggression and reduce prosocial behavior, while prosocial games promote the opposite effects. These effects are bidirectional and can manifest both immediately and over long-term repeated exposure.
 
-Meta-analyses (e.g., Anderson et al., 2010) have confirmed that violent video games increase aggressive thoughts, emotions, and behaviors while decreasing empathy and helping tendencies. Since cooperative behavior and empathy counteract aggression (Eron & Huesmann, 1984), it is plausible that playing violent games cooperatively might reduce aggressive responses.
+However, violent content is not the only factor driving anger. Smith et al. (2019) identify miscommunication and diverging goals within teams as internal stressors, while Behnke et al. (2021) report that weak teammates can elicit anger.
 
-Motivated by these findings and the theoretical framework, this project investigates whether cooperative gameplay moderates anger expressions in online gaming discourse. Specifically, we examine if cooperative modes attenuate anger compared to non-cooperative modes across different game types and subreddit contexts.
+Because cooperation and empathy can counteract aggression (Eron & Huesmann, 1984), it is plausible that cooperative gameplay might reduce anger.
+
+Motivated by these findings and the GLM framework, this project investigates whether cooperative gameplay moderates anger expressions in online gaming discourse. Specifically, we examine whether cooperative modes reduce anger compared to non-cooperative modes across different game types and subreddit contexts.
 
 **Research Questions:**
-1. Does team play increase anger level expressed in subreddit gaming communities?
+1. Does team play increase anger expression in subreddit gaming communities?
 2. Does cooperative gameplay reduce anger expression in gaming communities?
 
 **Hypotheses:**
 
-- Hypothesis 1: Increased team play—i.e., games involving more players or multiplayer modes—is associated with higher anger expression.
-This hypothesis is inspired by evidence that playing with weak or frustrating teammates often elicits anger, especially in competitive multiplayer environments where coordination and performance matter. As the number of players increases, the potential for conflict, frustration, and thus anger may rise, reflected in the emotional content of online comments.
-- Hypothesis 2: Cooperative gameplay moderates anger expression, such that playing cooperatively reduces anger, particularly in genres or subreddit communities associated with violent or competitive content.
-Based on the General Learning Model (GLM) and empirical findings on prosocial game effects, cooperative play may buffer aggressive responses by fostering empathy and social bonding, thereby lowering anger expression despite violent or competitive game contexts.
-Together, these hypotheses aim to clarify the complex relationship between game mode (team size and cooperation), game content, and emotional reactions as reflected in gamer discourse online.
+- H1: Greater team play (e.g., larger multiplayer modes) is associated with increased anger expression.
+This reflects evidence that coordination failures and frustrating teammates often elicit anger, especially in competitive settings where performance matters.
+- H2: Cooperative gameplay reduces anger expression.
+Drawing on the GLM and research on prosocial games, cooperative play may foster empathy and social bonding, thereby buffering against anger—even in violent or competitive contexts.
 
 ## Dataset
 
@@ -573,13 +575,33 @@ Here, again, most phrases had neutral sentiments, with only a few exceptions. Si
 
 
 
-## Conclusion
+## Conclusion (p1)
 
 The TF-IDF analysis helped identify the most distinctive phrases across different gaming communities, highlighting key terms related to gameplay, competition, and player interactions. The Word2Vec embeddings revealed meaningful semantic relationships between phrases, uncovering clusters of related terms that reflect shared themes or characteristics within each gaming community.
 
 Our sentiment analysis of the TF-IDF phrases showed that most gaming discussions tend to be emotionally neutral rather than strongly positive or negative. While we observed some negatively charged terms, such as “people team” and “console players,” mostly from competitive multiplayer games, the limited number of phrases with clear positive or negative sentiment means we cannot draw definitive conclusions. Nonetheless, these initial findings highlight interesting emotional dynamics around game mechanics and competitiveness that motivate us to investigate these dynamics further.
 
 Limitations: There was an imbalance in our dataset, with the majority of comments coming from League of Legends, followed by Hearthstone, while other games had significantly fewer comments. This imbalance may have affected both the sentiment analysis and the overall results. Also the fact that we looked at the sentiment of sentences that TF-IDF phrases appeared in, means we only get approximation of how phrases tend to be used or discussed but not their standalone sentiment.
+
+
+## Conclusion (p2)
+
+This analysis explored how game metadata—particularly game mode (e.g., multiplayer/cooperative play), game age, and user rating—relate to anger probability scores derived from an emotion classifier (emoBERT) applied to Reddit gaming comments. Guided by the General Learning Model (GLM) (Buckley and Anderson, 2006) and prior findings in favor of teamplay effects (Behnke et al., 2021, Smith et al., 2019), we focused on two main research questions:
+
+- Does increased team play (higher multiplayer involvement) increase anger expression in subreddit gaming communities, and
+- Does cooperative gameplay reduce such anger expression?
+
+Using a linear mixed-effects model with random intercepts for author, subreddit, and combined genre to account for nested data and unobserved heterogeneity, we modeled fixed effects for multiplayer rank, cooperative mode, game age, and rating. Results partially supported the hypotheses: higher multiplayer ranking was generally associated with increased anger, consistent with the first hypothesis.
+
+However, the interaction between multiplayer rank and cooperative mode revealed that cooperative play increased anger expression at lower multiplayer levels — suggesting that cooperation may increase anger in smaller team settings. At higher multiplayer levels, the mitigating effect of cooperative team play emerged. However, confidence interval overlap, indicating more complex social dynamics possibly influenced by other unmeasured factors.
+
+Furthermore, our multilevel model reveladed only little variation of anger between subreddits, and even less so between genres of the associated games.
+
+Several limitations temper these conclusions. Measurement errors in the IGDB metadata—for example, underreported cooperative features in some games—likely attenuated effect estimates. Similarly, emoBERT’s classification accuracy and the absence of contextual variables such as post timing, community feedback (upvotes/downvotes), and distinctions between online and offline play constrain explanatory power. The residual distribution’s right skew and low fixed-effects R-squared indicate that key predictors of anger remain unmodeled.
+
+Furthermore, the Reddit gaming community represents a selective and emotionally expressive population, limiting the generalizability of findings. The comment-level approach, without user or game-level aggregation, may inflate significance due to non-independence of observations. Crucially, the lack of data distinguishing online versus offline cooperative play restricts interpretation of the cooperation effect, as these contexts likely differ substantially in social dynamics.
+
+**In conclusion**, our findings offer preliminary support the GLM’s framework: cooperative gameplay can attenuate anger expression in online gaming discourse, especially in less complex multiplayer contexts. The data also confirm that increased multiplayer involvement tends to raise anger expression, aligning with expectations about team-based frustrations. Future research should refine metadata quality, incorporate richer contextual variables, and examine these dynamics across more representative gaming populations and interaction types. Despite limitations, this study demonstrates the value of integrating emotion classification with detailed game metadata to illuminate the social-emotional effects of video game play in real-world online communities.
 
 ## Contributions
 
@@ -594,3 +616,13 @@ Limitations: There was an imbalance in our dataset, with the majority of comment
 
 1. Srinivasa-Desikan, Bhargav (2018). *Natural Language Processing and Computational Linguistics: A practical guide to text analysis with Python, Gensim, spaCy, and Keras*. Packt Publishing Ltd.
 2. Bishop, Christopher M. (2006). *Pattern Recognition and Machine Learning (Information Science and Statistics)*. Springer-Verlag. Berlin, Heidelberg. ISBN: 0387310738.
+
+3. Anderson, C. A., Shibuya, A., Ihori, N., Swing, E. L., Bushman, B. J., Sakamoto, A., Rothstein, H. R., & Saleem, M. (2010). Violent video game effects on aggression, empathy, and prosocial behavior in eastern and western countries: A meta-analytic review. Psychological Bulletin, 136(2), 151–173. https://doi.org/10.1037/a0018251
+
+4. Behnke, M., Chwiłkowska, P., & Kaczmarek, L. D. (2021). What makes male gamers angry, sad, amused, and enthusiastic while playing violent video games? Entertainment Computing, 37, 100397. https://doi.org/10.1016/j.entcom.2020.100397
+
+5. Buckley, K. E., & AndErlbaumC. A. (2006). A Theoretical Model of the Effects and Consequences of Playing Video Games. In Playing video games: Motives, responses, and consequences (pp. 363–378). Lawrence Erlbaum Associates Publishers.
+
+6. Eron, L. D., & Huesmann, L. R. (1984). The relation of prosocial behavior to the development of aggression and psychopathology. Aggressive Behavior, 10(3), 201–211. https://doi.org/10.1002/1098-2337(1984)10:3<201::AID-AB2480100304>3.0.CO;2-S
+
+7. Smith, M. J., Birch, P. D. J., & Bright, D. (2019). Identifying Stressors and Coping Strategies of Elite Esports Competitors. International Journal of Gaming and Computer-Mediated Simulations (IJGCMS), 11(2), 22–39. https://doi.org/10.4018/IJGCMS.2019040102
