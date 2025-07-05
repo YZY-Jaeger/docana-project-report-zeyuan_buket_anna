@@ -202,84 +202,71 @@ We used Kaggle and Google Colab to conduct experiment with the dataset
 
 Report how you conducted the experiments. We suggest including detailed explanations of the preprocessing steps and model training in your project. For the preprocessing, describe  data cleaning, normalization, or transformation steps you applied to prepare the dataset, along with the reasons for choosing these methods. In the section on model training, explain the methodologies and algorithms you used, detail the parameter settings and training protocols, and describe any measures taken to ensure the validity of the models.
 
-#### PCA
-
+#### PCA + K-means
 Since the embeddings are high-dimensional, we applied Principal Component Analysis (PCA) to reduce them to 2 dimensions (X_reduced) for visualization.
+KMeans groups phrases with similar vector representations.
+
+- The model tries to group together bigrams that appeared in similar contexts across the data. For example, phrases about a particular game or character might cluster together because their usage patterns are similar.
+
+- Each cluster may represent a different topic  (e.g., one cluster's tokens could be related to Overwatch, another to Pokémon, etc.).
 
 
 ```python
-import numpy as np
-import plotly.express as px
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-import pandas as pd
-import plotly.io as pio
-```
+n_clusters = 6  # adjust this
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+labels = kmeans.fit_predict(X)
 
-
-```python
-# Filter to only those in the vocab
-valid_phrases = [p for p in unique_phrases if p in w2v_model.wv]
-
-# Get their vectors
-X = np.array([w2v_model.wv[p] for p in valid_phrases])
-
-# Reduce to 2D
-pca = PCA(n_components=2)
-X_reduced = pca.fit_transform(X)
-
-# Set Plotly renderer
-pio.renderers.default = 'notebook'
-
-# Check data availability
-#print(X_reduced.shape)
-#print(valid_phrases)
-
-# Create a DataFrame for Plotly
-pca_df = pd.DataFrame({
+# Create DataFrame for plotting
+pca_cluster_df = pd.DataFrame({
     'x': X_reduced[:, 0],
     'y': X_reduced[:, 1],
-    'phrase': valid_phrases
+    'phrase': valid_phrases,
+    'subreddit': subreddit_info,
+    'cluster': labels.astype(str)  # Convert to string for nicer labels
 })
 
-# Create interactive scatter plot
+# Plotly scatter plot
 fig = px.scatter(
-    pca_df, 
-    x='x', 
-    y='y', 
-    text='phrase', #if this commented out, no text will show unless mouseover
-    #hover_name='phrase',  # Show phrase on hover
-    hover_data=['phrase'],  # Shows phrase on hover
-    title="Interactive 2D PCA Visualization of Subreddit Bigrams"
+    pca_cluster_df,
+    x='x',
+    y='y',
+    color='cluster',
+    text='phrase',
+    hover_data=['phrase', 'subreddit', 'cluster'],
+    title="Interactive PCA + KMeans Clustering of Subreddit Bigrams",
+    color_discrete_sequence=px.colors.qualitative.Safe  # or other color set
 )
 
-# Adjust text position and size
+# Tweak marker and text appearance
 fig.update_traces(
     textposition='top center',
     textfont_size=10,
-    marker=dict(size=8)
+    marker=dict(size=8, line=dict(width=0.5, color='black'))
 )
 
-# Add axis labels
+# Axis labels and layout
 fig.update_layout(
     xaxis_title="PCA 1",
     yaxis_title="PCA 2",
-    hovermode='closest'
+    hovermode='closest',
+    legend_title="Cluster"
 )
 
-# Show the figure
+# Show the plot
 fig.show(renderer='iframe')
-```
+
 
 
 <iframe
     scrolling="no"
     width="100%"
     height="545px"
-    src="{{ site.baseurl }}/figures/figure_21.html"
+    src="{{ site.baseurl }}/figures/figure_23.html"
     frameborder="0"
     allowfullscreen
 ></iframe>
+
+
 
 
 
@@ -341,13 +328,14 @@ fig.show(renderer='iframe')
     scrolling="no"
     width="100%"
     height="545px"
-    src="{{ site.baseurl }}/figures/figure_24.html"
+    src="{{ site.baseurl }}/figures/figure_25.html"
     frameborder="0"
     allowfullscreen
 ></iframe>
 
 
-### Sentiment Analysis (p2)
+
+### Sentiment Analysis 
 
 
 In our analysis, we examine how game metadata (e.g., mode_rank, has_coop, game_age, rating) affects the probability of anger expressed in comments of
@@ -390,6 +378,45 @@ We label the comments in df_sampled (max.500 sampled posts per gaming subreddit,
 
 Make sure to enable GPU acceleration (e.g., Kaggle: Settings → Accelerator → GPU, Colab: Runtime → Change runtime type → GPU) and pass your models and data to the GPU to significantly speed up inference and handle large-scale emotion and sentiment classification efficiently.
 
+```python
+# Check GPU availability
+print("GPU Available:", torch.cuda.is_available())
+if torch.cuda.is_available():
+    print("CUDA Device:", torch.cuda.get_device_name(0))
+
+# Load phrases once and convert to sets for faster lookup
+phrases_df = pd.read_csv('top_50_phrases_per_subreddit.csv')
+phrases_per_subreddit = {
+    sub: set(phrases.str.lower()) 
+    for sub, phrases in phrases_df.groupby('subreddit')['phrase']
+}
+```
+
+    GPU Available: True
+    CUDA Device: Tesla T4
+    
+
+
+```python
+# Initialize pipelines
+pipe_distilbert = pipeline(
+    "text-classification",
+    model="j-hartmann/emotion-english-distilroberta-base",
+    truncation=True,
+    max_length=512,
+    device=0 if torch.cuda.is_available() else -1,
+    batch_size=16  # Process multiple sentences at once
+)
+
+pipe_roberta = pipeline(
+    "sentiment-analysis", 
+    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+    truncation=True,
+    max_length=512,
+    device=0 if torch.cuda.is_available() else -1,
+    batch_size=16
+)
+```
 ## Results and Discussion
 
 
