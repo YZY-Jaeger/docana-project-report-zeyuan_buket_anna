@@ -599,47 +599,125 @@ Here, again, most phrases had neutral sentiments, with only a few exceptions. Si
 
 
 ```python
-# emoBERT_anger by selected subreddits, ordered by mean
+# Use distilbert for conventional emotion classification
+pipe_distilbert = pipeline(
+    task="text-classification",
+    model="j-hartmann/emotion-english-distilroberta-base",
+    truncation=True,
+    max_length=512,
+    device=0,
+    return_all_scores=True  # KEY CHANGE: This returns all category scores
+)
 
-# Selected subreddits -  based on First Part of Project
-selected = ['leagueoflegends', 'pokemon', 'zelda', 'overwatch', 'smashbros', 'hearthstone']
+# Create HF Dataset from your dataframe
+ds = Dataset.from_pandas(df_sampled)
 
-# Get summary stats for emoBERT_anger
-summary_anger = comment_df.groupby('subreddit', observed=True)['emoBERT_anger'].agg(['mean'])
+def classify_distilbert(batch):
+    texts = batch['content']  # or 'normalizedBody' if preferred
+    outputs = pipe_distilbert(texts, batch_size=BATCH_SIZE, truncation=True)
 
-# Get 5 subreddits with lowest and highest mean anger
-lowest_anger = summary_anger.sort_values(by='mean').head(5).index.tolist()
-highest_anger = summary_anger.sort_values(by='mean').tail(5).index.tolist()
+    # Extract all scores for each text
+    batch_results = {'emoBERT_top_label': [], 'emoBERT_top_score': []}
 
-# Combine with your selected list (removing duplicates)
-combined_anger_subreddits = list(set(selected + lowest_anger + highest_anger))
+    # Get all unique labels from the first prediction to create columns
+    if outputs and len(outputs) > 0:
+        all_labels = [score_dict['label'] for score_dict in outputs[0]]
+        for label in all_labels:
+            batch_results[f'emoBERT_{label}'] = []
 
-# Filter the dataframe to just those subreddits
-subset_anger = comment_df[comment_df['subreddit'].isin(combined_anger_subreddits)]
+    # Process each text's predictions
+    for text_outputs in outputs:
+        # Get top prediction
+        top_pred = max(text_outputs, key=lambda x: x['score'])
+        batch_results['emoBERT_top_label'].append(top_pred['label'])
+        batch_results['emoBERT_top_score'].append(top_pred['score'])
 
-# Sort subreddit order by mean emoBERT_anger
-ordered_anger = subset_anger.groupby('subreddit', observed=True)['emoBERT_anger'].mean().sort_values().index.tolist()
+        # Get all scores
+        for score_dict in text_outputs:
+            label = score_dict['label']
+            score = score_dict['score']
+            batch_results[f'emoBERT_{label}'].append(score)
 
-# Boxplot
-plt.figure(figsize=(12, 6))
-sns.boxplot(data=subset_anger, x='subreddit', y='emoBERT_anger',
-               palette='coolwarm', order=ordered_anger)
-plt.title("Distribution of 'emoBERT_anger' for Selected + Extreme Subreddits")
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
+    return batch_results
 
-# Violin plot
-plt.figure(figsize=(12, 6))
-sns.violinplot(data=subset_anger, x='subreddit', y='emoBERT_anger',
-               inner='box', palette='coolwarm', order=ordered_anger)
-plt.title("Distribution of 'emoBERT_anger' for Selected + Extreme Subreddits")
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
+print("Running DistilBERT emotion classification with datasets.map...")
+# Run classification in batches
+ds = ds.map(classify_distilbert, batched=True, batch_size=BATCH_SIZE)
+
+# Convert back to pandas dataframe with emotion results
+df_sampled = ds.to_pandas()
+
+# Save intermediate results
+
+df_sampled.to_csv(output_csv, index=False)
+from google.colab import files
+files.download('df_games_emobert.csv')
+
+del pipe_distilbert
+torch.cuda.empty_cache()
 ```
 
+"""python
+# Load roberta sentiment analysis pipeline
+pipe_roberta = pipeline(
+    task="sentiment-analysis",
+    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+    tokenizer="cardiffnlp/twitter-roberta-base-sentiment-latest",
+    truncation=True,
+    max_length=512,
+    device=0,
+    return_all_scores=True  # KEY CHANGE: This returns all category scores
+)
 
+# Create new dataset from updated dataframe that now includes emotion results
+ds = Dataset.from_pandas(df_sampled)
+
+def classify_batch(batch):
+    texts = batch['content']  # replace with your text column if different
+    outputs = pipe_roberta(texts, batch_size=BATCH_SIZE, truncation=True)
+
+    # Extract all scores for each text
+    batch_results = {'sentiBERT_top_label': [], 'sentiBERT_top_score': []}
+
+    # Get all unique labels from the first prediction to create columns
+    if outputs and len(outputs) > 0:
+        all_labels = [score_dict['label'] for score_dict in outputs[0]]
+        for label in all_labels:
+            batch_results[f'sentiBERT_{label}'] = []
+
+    # Process each text's predictions
+    for text_outputs in outputs:
+        # Get top prediction
+        top_pred = max(text_outputs, key=lambda x: x['score'])
+        batch_results['sentiBERT_top_label'].append(top_pred['label'])
+        batch_results['sentiBERT_top_score'].append(top_pred['score'])
+
+        # Get all scores
+        for score_dict in text_outputs:
+            label = score_dict['label']
+            score = score_dict['score']
+            batch_results[f'sentiBERT_{label}'].append(score)
+
+    return batch_results
+
+print("Running RoBERTa sentiment classification with datasets.map...")
+# Map the classification function over the dataset in batched mode
+ds = ds.map(classify_batch, batched=True, batch_size=BATCH_SIZE)
+
+# Convert back to pandas DataFrame with new columns added
+df_sampled = ds.to_pandas()
+
+# Save final results
+df_sampled.to_csv('df_games_bert.csv', index=False)
+from google.colab import files
+files.download('df_games_bert.csv')
+
+print("Classification complete! Check your CSV files for all category scores.")
+print("Columns will include:")
+print("- Top predictions: emoBERT_top_label, emoBERT_top_score, sentiBERT_top_label, sentiBERT_top_score")
+print("- All emotion scores: emoBERT_joy, emoBERT_sadness, emoBERT_anger, etc.")
+print("- All sentiment scores: sentiBERT_NEGATIVE, sentiBERT_NEUTRAL, sentiBERT_POSITIVE")
+"""
     
 ![png](code/docana_project_part2_files/docana_project_part2_57_0.png)
     
@@ -847,7 +925,7 @@ Several limitations temper these conclusions. Measurement errors in the IGDB met
 
 Furthermore, the Reddit gaming community represents a selective and emotionally expressive population, limiting the generalizability of findings. The comment-level approach, without user or game-level aggregation, may inflate significance due to non-independence of observations. Crucially, the lack of data distinguishing online versus offline cooperative play restricts interpretation of the cooperation effect, as these contexts likely differ substantially in social dynamics.
 
-**In conclusion**, our findings offer preliminary support the GLM’s framework: cooperative gameplay can attenuate anger expression in online gaming discourse, especially in less complex multiplayer contexts. The data also suggests that increased multiplayer involvement tends to raise anger expression, aligning with expectations about team-based frustrations, though our findings here were not significant. Future research should refine metadata quality, incorporate richer contextual variables, and examine these dynamics across more representative gaming populations and interaction types. Despite limitations, this study demonstrates the value of integrating emotion classification with detailed game metadata to illuminate the social-emotional effects of video game play in real-world online communities.
+In conclusion, our findings offer preliminary support the GLM’s framework: cooperative gameplay can attenuate anger expression in online gaming discourse, especially in less complex multiplayer contexts. The data also suggests that increased multiplayer involvement tends to raise anger expression, aligning with expectations about team-based frustrations, though our findings here were not significant. Future research should refine metadata quality, incorporate richer contextual variables, and examine these dynamics across more representative gaming populations and interaction types. Despite limitations, this study demonstrates the value of integrating emotion classification with detailed game metadata to illuminate the social-emotional effects of video game play in real-world online communities.
 
 ## Contributions
 
