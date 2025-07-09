@@ -1,6 +1,6 @@
 
 
-# Project Title
+# Semantic and Emotional Landscapes in Gaming Subreddits
 
 Group members: Buket Sak, Anna Werner, Zeyuan Yu
 ## Full notebooks
@@ -598,6 +598,11 @@ Taking one of the subreddit we researched on, r/leagueoflegends, as example, "el
 ![Emotion Distribution by Phrase in r/leagueoflegends](figures/docana-project1_68_5.png)
 
 Here, again, most phrases had neutral sentiments, with only a few exceptions. Since these non-neutral phrases are limited in number. We also examined the second most dominant emotions to gain a better understanding.
+
+#### Wordcloud
+From just a few examples, we could say that negative sentiment tends to focus on game mechanics and competitiveness. For example, negative phrases like “people team”, “console players”, "beat elite" could refer to multiplayer aspects, while “lower elo” is a term used in League of Legends to describe less skilled players. Additionally, some negative phrases include character names as well such as Tracer, Genji, and Dr. Mario. Most of these negative phrases come primarily from Overwatch, League of Legends, and Smash Bros, all of which are competitive multiplayer games.
+![Negative and Positive wordcloud](figures/docana-project1_64_0.png)
+
 
 #### Second Dominant Emotion
 ![Second Dominant Emotion](figures/docana-project1_73_0.png)
