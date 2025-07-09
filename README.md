@@ -3,6 +3,15 @@
 # Project Title
 
 Group members: Buket Sak, Anna Werner, Zeyuan Yu
+## Full notebooks
+
+
+[Part 1](code/docana-project1.ipynb)
+
+
+[Part 2](code/docana_project_part2.ipynb)
+
+
 
 ## Introduction - P1
 
@@ -929,11 +938,12 @@ In conclusion, our findings offer preliminary support the GLM’s framework: coo
 
 ## Contributions
 
-| Team Member  | Contributions                                             |
-|--------------|-----------------------------------------------------------|
-| Alice Smith  | Data collection, preprocessing, model training, evaluation|                                                       |
-| Bob Johnson  | ...                                                       |
-| ...          | ...                                                       |
+| Team Member  | Contributions                                                                                     |
+|--------------|---------------------------------------------------------------------------------------------------|
+| Buket Sak    | Part 1: Data preprocessing, Word2Vec training, PCA and K-means, Sentiment analysis                |
+| Anna Werner  | Part 2: Introducing IGDB database, Sentiment Analysis                                             |
+| Zeyuan Yu    | Help with research questions, write the GitHub.io report                                           |
+
 
 ## References
 
