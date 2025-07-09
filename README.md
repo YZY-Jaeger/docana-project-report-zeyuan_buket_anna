@@ -941,7 +941,7 @@ In conclusion, our findings offer preliminary support the GLM’s framework: coo
 | Team Member  | Contributions                                                                                     |
 |--------------|---------------------------------------------------------------------------------------------------|
 | Buket Sak    | Part 1: Data preprocessing, Word2Vec training, PCA and K-means, Sentiment analysis                |
-| Anna Werner  | Part 2: Introducing IGDB database, Sentiment Analysis                                             |
+| Anna Werner  | Part 2: Preprocessing, variable construction and data imputation, introducing IGDB database, multi-level modelling, Sentiment Analysis, Statstistical analysis                                             |
 | Zeyuan Yu    | Help with research questions, write the GitHub.io report                                           |
 
 
